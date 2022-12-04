@@ -36,6 +36,7 @@ else
 fi
 
 # Creating file name
+
 timestamp=$(date '+%d%m%Y-%H%M%S')
 
 # Create tar archive of apache2 access and error logs
@@ -47,3 +48,24 @@ if [[ -f /tmp/${name}-httpd-logs-${timestamp}.tar ]]; then
           aws s3 cp /tmp/${name}-httpd-logs-${timestamp}.tar s3://${s3_bucket}/${name}-httpd-logs-${timestamp}.tar
 fi
 
+#task3
+
+docroot="/var/www/html"
+
+# Check if inventory file exists
+if [[ ! -f ${docroot}/inventory.html ]]; then
+	echo -e 'Log Type\t-\tTime Created\t-\tType\t-\tSize' > ${docroot}/inventory.html 
+fi
+
+# Inserting Logs into the file
+if [[ -f ${docroot}/inventory.html ]]; then
+    size=$(du -h /tmp/${name}-httpd-logs-${timestamp}.tar | awk '{print $1}')
+
+echo -e "httpd-logs\t-\t${timestamp}\t-\ttar\t-\t${size}" >> ${docroot}/inventory.html 
+fi
+
+# Create a cron job that runs service every minutes/day
+if [[ ! -f /etc/cron.d/automation ]]; then
+	echo "* * * * * root /root/Automation_Project/automation.sh" >> /etc/cron.d/automation 
+
+fi
